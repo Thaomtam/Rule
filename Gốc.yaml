@@ -1,0 +1,119 @@
+dns:
+  enable: true
+  use-hosts: true
+  ipv6: false
+  enhanced-mode: redir-host
+  fake-ip-range: 198.18.0.1/16
+  listen: 127.0.0.1:6868
+  default-nameserver:
+    - 119.29.29.29
+    - 114.114.114.114
+  nameserver:
+    - https://doh.pub/dns-query
+    - tls://223.5.5.5:853
+  fallback:
+    - 'https://1.0.0.1/dns-query#DNS'  
+    - 'tls://8.8.4.4:853#DNS'
+  fallback-filter:
+    geoip: false
+    geosite:
+      - gfw  
+    domain:
+      - +.example.com
+    ipcidr:
+      - 0.0.0.0/32
+proxies:
+  - name: "V1"
+    type: vless
+    server: saoke.site
+    port: 443
+    uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8
+    udp: true
+    tls: true
+    network: ws
+    servername: v3.tiktokcdn.com
+    skip-cert-verify: true
+    ws-opts:
+      path: "/PXXZ61"
+      headers:
+        Host: v3.tiktokcdn.com       
+
+  - name: "V2"
+    type: vless
+    server: saoke.site
+    port: 443
+    uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8
+    udp: true
+    tls: true
+    network: ws
+    servername: dl.kgvn.garenanow.com
+    skip-cert-verify: true
+    ws-opts:
+      path: "/PXXZ61"
+      headers:
+        Host: dl.kgvn.garenanow.com    
+        
+  - name: "V3"
+    type: trojan
+    server: saoke.site
+    port: 443
+    password: admin123
+     udp: true
+     sni: dl.kgvn.garenanow.com 
+     alpn:
+       - h2
+       - http/1.1
+     skip-cert-verify: true  
+
+  - name: "V4"
+    type: trojan
+    server: saoke.site
+    port: 443
+    password: admin123
+     udp: true
+     sni: v9.byteicdn.com
+     alpn:
+       - h2
+       - http/1.1
+     skip-cert-verify: true         
+     
+  - {name: V5, server: saoke.site, port: 443, type: vmess, uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8, sni: v9.byteicdn.com, alterId: 0, cipher: auto, tls: 1, skip-cert-verify: true, udp: true, network: ws, ws-opts: {path: /RL2QZ6UP, headers: {Host: v9.byteicdn.com}}}     
+  - {name: V6, server: saoke.site, port: 443, type: vmess, uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8, sni: dl.kgvn.garenanow.com, alterId: 0, cipher: auto, tls: 1, skip-cert-verify: true, udp: true, network: ws, ws-opts: {path: /RL2QZ6UP, headers: {Host: dl.kgvn.garenanow.com}}}     
+
+  - name: "v7"
+    type: vless
+    server: saoke.site
+    port: 443
+    uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8
+    network: tcp
+    servername: dl.kgvn.garenanow.com
+    flow: xtls-rprx-direct 
+    skip-cert-verify: true
+    
+  - name: "v8"
+    type: vless
+    server: saoke.site
+    port: 443
+    uuid: 3feff3a5-6bf4-42f8-aede-635f0ce5ccd8
+    network: tcp
+    servername: v9.byteicdn.com
+    flow: xtls-rprx-direct 
+    skip-cert-verify: true    
+proxy-groups:
+  - name: Xray-core
+    type: url-test
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    proxies:
+      - V1
+      - V2   
+      - V3
+      - V4   
+      - V5
+      - V6
+      - V7
+      - V8     
+rules:
+ - GEOIP,telegram,PROXY,no-resolve
+ - GEOIP,private,DIRECT,no-resolve
+ - MATCH,Xray-core
